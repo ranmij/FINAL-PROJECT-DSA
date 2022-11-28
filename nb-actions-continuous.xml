@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE actions SYSTEM "action-mapping.dtd">
+<actions>
+    <action name="build" repeatable="true">
+        <args>build</args>
+    </action>
+    <action name="run" repeatable="true"/>
+</actions>
