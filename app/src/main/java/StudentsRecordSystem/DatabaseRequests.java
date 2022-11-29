@@ -19,7 +19,13 @@ import javax.swing.table.TableColumn;
  *
  * @author Clancy Sanchez
  */
-public class DatabaseRequests extends DatabaseUtility {    
+public class DatabaseRequests extends DatabaseUtility {
+
+    /**
+     *
+     * For initialization of database
+     * @param databaseName
+    */
     DatabaseRequests(String databaseName) {
         String defaultPath = System.getProperty("user.home") + "\\SchoolRecordSystem\\";
         if (!Files.exists(Paths.get((databaseName.endsWith(".db"))? defaultPath+databaseName : defaultPath+databaseName+".db"))) {
@@ -37,6 +43,10 @@ public class DatabaseRequests extends DatabaseUtility {
         }
     }
     
+    /**
+     * Initialize the database when the application first run
+     * @return Boolean 
+     */
     private boolean initTables(){
         String sqlQuery = "CREATE TABLE students_tbl (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
                 + "first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL,"
@@ -48,6 +58,10 @@ public class DatabaseRequests extends DatabaseUtility {
         return false;
     }
     
+    /**
+     * Set the column header of the table
+     * @param tableModel 
+     */
     private void fillColumnHeaders(DefaultTableModel tableModel) {
         String[] columnNames = getColumnNames();
         if (columnNames != null) {
@@ -57,9 +71,15 @@ public class DatabaseRequests extends DatabaseUtility {
         }
     }
     
+    /**
+     * Set the data row of the table
+     * @param tableModel
+     * @param table
+     * @param resData
+     * @return Boolean
+     */
     private boolean fillDataRows(DefaultTableModel tableModel, JTable table, ResultSet resData) {
         if (resData != null) {
-            
             try {
                 fillColumnHeaders(tableModel);
                 String[] columns = {"id", "first_name", "last_name", "age", "phone", "course", "student_no"};
@@ -89,7 +109,20 @@ public class DatabaseRequests extends DatabaseUtility {
         return false;
     }
     
-    public String[] getColumnNames() {
+    /**
+     * Initialize the JTable rows and columns
+     * @param table 
+     */
+    public void initializeTable(JTable table) {
+        ResultSet resData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
+        fillDataRows(new DefaultTableModel(), table, resData);
+    }
+    
+    /**
+     * Get the column names from the database
+     * @return String[]
+     */
+    private String[] getColumnNames() {
         String[] columns = new String[7];
         ResultSet columnNames = RetrieveQuery("SELECT name FROM PRAGMA_TABLE_INFO('students_tbl');");
         try {
@@ -107,25 +140,13 @@ public class DatabaseRequests extends DatabaseUtility {
         }
     }
     
-    public void getData(DefaultTableModel tableModel) {
-        ResultSet rawData = RetrieveQuery("SELECT first_name, last_name, age, phone, course, student_no, id FROM students_tbl;");
-        if (rawData != null) {
-            try {
-                String[] columns = {"id", "first_name", "last_name", "age", "phone", "course", "student_no"};
-                while(rawData.next()){
-                    Object[] data = new Object[7];
-                    for (int i = 0; i < columns.length; i++) {
-                        data[i] = (Object)rawData.getString(columns[i]);
-                    }
-                    tableModel.addRow(data);
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(DatabaseRequests.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-    
-    public boolean searchData(DefaultTableModel tableModel, JTable table, String searchQuery) {
+    /**
+     * Use for searching database table
+     * @param table
+     * @param searchQuery
+     * @return Boolean
+     */
+    public boolean searchData(JTable table, String searchQuery) {
         ResultSet rawData;
         if (!searchQuery.isBlank() || searchQuery.isEmpty())
             rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl WHERE " +
@@ -133,36 +154,52 @@ public class DatabaseRequests extends DatabaseUtility {
                             searchQuery, searchQuery, searchQuery, searchQuery, searchQuery));
         else 
             rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
-        return fillDataRows(tableModel, table, rawData);
+        return fillDataRows(new DefaultTableModel(), table, rawData);
     }
     
+    /**
+     * Use for inserting data in the database table
+     * @param data
+     * @param table
+     * @return Boolean
+     */
     public boolean insertData(String[] data, JTable table) {
         if (ExecuteQuery(String.format("INSERT INTO students_tbl (first_name, last_name, age, phone,course, student_no) VALUES ('%s', '%s', %d , '%s', '%s', '%s');", data[0], data[1], Integer.parseInt(data[2]), data[3], data[4], data[5]))) {
-            DefaultTableModel tableModel = new DefaultTableModel();
             ResultSet rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
-            fillDataRows(tableModel, table, rawData);
+            fillDataRows(new DefaultTableModel(), table, rawData);
             return true;
         }
         return false;
     }
     
+    /**
+     * Use for updating data in database table
+     * @param data
+     * @param table
+     * @param id
+     * @return Boolean
+     */
     public boolean updateData(String[] data, JTable table, String id) {
         if(ExecuteQuery(String.format("UPDATE students_tbl SET first_name = '%s',"
                 + "last_name = '%s', age = %s, phone = '%s', course = '%s', student_no = '%s'"+
                 " WHERE id = %s;", data[0],data[1],data[2],data[3],data[4],data[5], id))){
-            DefaultTableModel tableModel = new DefaultTableModel();
             ResultSet rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
-            return fillDataRows(tableModel, table, rawData);
+            return fillDataRows(new DefaultTableModel(), table, rawData);
 
         }
         return false;
     }
     
+    /**
+     * Use for deleting data in the database table
+     * @param table
+     * @param id
+     * @return Boolean
+     */
     public boolean deleteData(JTable table, String id) {
         if(ExecuteQuery(String.format("DELETE FROM students_tbl WHERE id = %s", id))) {
-            DefaultTableModel tableModel = new DefaultTableModel();
             ResultSet rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
-            fillDataRows(tableModel, table, rawData);
+            fillDataRows(new DefaultTableModel(), table, rawData);
             return true;
         }
         return false;

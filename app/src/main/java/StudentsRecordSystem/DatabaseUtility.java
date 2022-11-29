@@ -17,12 +17,16 @@ import java.util.logging.Logger;
  * @author Clancy Sanchez
  */
 public class DatabaseUtility {
-    private String databaseName;
+    private String databaseName;        // databaseName
     
-    public DatabaseUtility(){
+    DatabaseUtility() {
         
     }
     
+    /**
+     * Initialize the database name
+     * @param databaseName 
+     */
     public DatabaseUtility(String databaseName) {
         if (databaseName.endsWith(".db")) {
             this.databaseName = databaseName;
@@ -31,6 +35,10 @@ public class DatabaseUtility {
         }
     }
     
+    /**
+     * databasename setter
+     * @param databaseName 
+     */
     public void setDatabaseName(String databaseName) {
         if (databaseName.endsWith(".db")) {
             this.databaseName = databaseName;
@@ -40,8 +48,10 @@ public class DatabaseUtility {
     }
     
   
-    // since we are only dealing with simple project let's leave it unprotected
-    // no password or username
+    /**
+     * Creates new connection for every call
+     * @return connection
+     */
     private Connection CreateDatabaseConnection() {
         Connection connection;
         try {
@@ -57,7 +67,10 @@ public class DatabaseUtility {
         return null;
     }
 
-    // closes the connection
+    /**
+     * Use for closing the connection
+     * @param connection 
+     */
     public void Close(Connection connection) {
         try {
             if(connection != null)
@@ -67,7 +80,11 @@ public class DatabaseUtility {
         }
     }
 
-    // executes query that doen't retrieve data.
+    /**
+     * Executes query that doesn't retrieve data from database
+     * @param query
+     * @return Boolean
+     */
     public boolean ExecuteQuery(String query) {
         Connection connection = CreateDatabaseConnection();
         if (connection != null) {
@@ -83,7 +100,11 @@ public class DatabaseUtility {
         return false;
     }
 
-    // executes query that returns data
+    /**
+     * Executes queries that retrieve data from database
+     * @param query
+     * @return ResultSet
+     */
     public ResultSet RetrieveQuery(String query) {
         Connection connection = CreateDatabaseConnection();
         if(connection != null) {

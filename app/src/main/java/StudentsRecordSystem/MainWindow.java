@@ -4,10 +4,10 @@
  */
 package StudentsRecordSystem;
 
+import java.awt.Image;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 
 /**
  *
@@ -21,24 +21,11 @@ public class MainWindow extends javax.swing.JFrame {
      */
     public MainWindow() {
         databaseHandler = new DatabaseRequests("database.db");
+        databaseHandler.initializeTable(studentsDataView);
         initComponents();
     }
 
-    public DefaultTableModel updateData(){
-        DefaultTableModel tableModel = (DefaultTableModel) studentsDataView.getModel();
-        String[] columnNames = databaseHandler.getColumnNames();
-        if (columnNames != null) {
-            for(String columName : columnNames) {
-                tableModel.addColumn(columName.replace("_", " ").toUpperCase());
-            }
-            databaseHandler.getData(tableModel);
-            TableColumn tableColumn = studentsDataView.getColumnModel().getColumn(0);
-            tableColumn.setPreferredWidth(0);
-            tableColumn.setMinWidth(0);
-            tableColumn.setMaxWidth(0);
-        }
-        return tableModel;
-    }
+    
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -58,7 +45,6 @@ public class MainWindow extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        studentsDataView.setModel(updateData());
         studentsDataView.getTableHeader().setReorderingAllowed(false);
         studentsDataView.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -129,8 +115,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
         // TODO add your handling code here:
         String searchString = searchQuery.getText();
-        DefaultTableModel tableModel = new DefaultTableModel();
-        if(!databaseHandler.searchData(tableModel, studentsDataView,searchString)){
+        if(!databaseHandler.searchData(studentsDataView,searchString)){
             JOptionPane.showMessageDialog(this, "No result");
         }
         
@@ -161,7 +146,6 @@ public class MainWindow extends javax.swing.JFrame {
         modalDialog.setVisible(true);
     }//GEN-LAST:event_studentsDataViewMouseClicked
 
-    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addStudentBtn;

@@ -37,10 +37,18 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+configurations {
+    // configuration that holds jars to include in the jar
+    extraLibs
+}
+
 jar {
     manifest {
         attributes(
                 'Main-Class': 'StudentsRecordSystem.App'
         )
+    }
+    from {
+            configurations.compileClasspath.filter{ it.exists() }.collect{ it.isDirectory() ? it : zipTree(it) }
     }
 }

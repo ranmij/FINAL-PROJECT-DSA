@@ -4,7 +4,12 @@
  */
 package StudentsRecordSystem;
 
+import java.awt.Color;
 import java.util.Arrays;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.border.LineBorder;
 
 /**
  *
@@ -182,64 +187,63 @@ public class ModalWindow extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
   
+    // Click event
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
-        // TODO add your handling code here:
         String[] data = {firstNameTextField.getText(), lastNameTextField.getText(), 
                 ageTextField.getText(), phoneTextField.getText(), courseTextField.getText(),
                 studentNoTextField.getText()};
-        if (!Arrays.asList(data).stream().allMatch(str-> !str.equals(""))) {
-            //JOptionPane.showMessageDialog(this, "Please fill the empty fields", "Empty Fields", JOptionPane.WARNING_MESSAGE);
+        JTextField[] textFields = {
+            firstNameTextField, lastNameTextField, ageTextField, phoneTextField, courseTextField, studentNoTextField
+        };
+        if (!Arrays.asList(data).stream().allMatch(str-> !(str.isBlank() || str.isEmpty()))) {
+            for(JTextField textField : textFields) {
+                if (textField.getText().isBlank() || textField.getText().isEmpty()) {
+                    textField.setBorder(new LineBorder(Color.red, 1));
+                }
+            }
         } else {
-            if (!databaseHandler.insertData(data, MainWindow.studentsDataView)) {
-                //JOptionPane.showMessageDialog(this, "An error occured please try again.", "Alert", JOptionPane.WARNING_MESSAGE);
-            } else {
-                //JOptionPane.showMessageDialog(this, "Student has been added.");
+            if (databaseHandler.insertData(data, MainWindow.studentsDataView)) {
+                this.setVisible(false);
+                for(JTextField textField : textFields) {
+                   textField.setText("");
+                   textField.setBorder(new LineBorder(Color.gray, 1));
+                }
             }
         }
-        firstNameTextField.setText("");
-        lastNameTextField.setText("");
-        ageTextField.setText("");
-        phoneTextField.setText("");
-        courseTextField.setText("");
-        studentNoTextField.setText("");
     }//GEN-LAST:event_addBtnActionPerformed
 
+    // Click event
     private void updateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateBtnActionPerformed
-        // TODO add your handling code here:
         String id = MainWindow.studentsDataView.getValueAt(MainWindow.studentsDataView.getSelectedRow(), 0).toString();
         String[] data = {firstNameTextField.getText(), lastNameTextField.getText(),
                         ageTextField.getText(), phoneTextField.getText(), courseTextField.getText(),
                         studentNoTextField.getText()};
+        JTextField[] textFields = {
+            firstNameTextField, lastNameTextField, ageTextField, phoneTextField, courseTextField, studentNoTextField
+        };
         if(databaseHandler.updateData(data, MainWindow.studentsDataView, id)) {
-            // JOptionPane.showMessageDialog(this, "Updated Successfully!");
-        } else {
-            // JOptionPane.showMessageDialog(this, "Unable to update the row", "Error", JOptionPane.WARNING_MESSAGE);
+            this.setVisible(false);
         }
-        firstNameTextField.setText("");
-        lastNameTextField.setText("");
-        ageTextField.setText("");
-        phoneTextField.setText("");
-        courseTextField.setText("");
-        studentNoTextField.setText("");
+        for (JTextField textField : textFields)
+            textField.setText("");
     }//GEN-LAST:event_updateBtnActionPerformed
 
+    // Click event
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
-        // TODO add your handling code here:
         String id = null;
         if(MainWindow.studentsDataView.getRowCount() > 0) {
             id = MainWindow.studentsDataView.getValueAt(MainWindow.studentsDataView.getSelectedRow(), 0).toString();
         }
         if(databaseHandler.deleteData(MainWindow.studentsDataView, id)) {
-            //JOptionPane.showMessageDialog(this, "Deleted Successfully!");
-        } else {
-            //JOptionPane.showMessageDialog(this, "Unable to delete the row", "Error", JOptionPane.WARNING_MESSAGE);
+            this.setVisible(false);
+            MainWindow.studentsDataView.setRowSelectionInterval(0, 0);
         }
-        firstNameTextField.setText("");
-        lastNameTextField.setText("");
-        ageTextField.setText("");
-        phoneTextField.setText("");
-        courseTextField.setText("");
-        studentNoTextField.setText("");
+        JTextField[] textFields = {
+            firstNameTextField, lastNameTextField, ageTextField, phoneTextField, courseTextField, studentNoTextField
+        };
+        for (JTextField textField : textFields)
+            textField.setText("");
+
     }//GEN-LAST:event_deleteBtnActionPerformed
 
 
