@@ -4,8 +4,6 @@
  */
 package StudentsRecordSystem;
 
-import java.awt.Image;
-import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 

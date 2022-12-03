@@ -7,8 +7,10 @@ package StudentsRecordSystem;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JTable;
@@ -78,7 +80,9 @@ public class DatabaseRequests extends DatabaseUtility {
      * @param resData
      * @return Boolean
      */
-    private boolean fillDataRows(DefaultTableModel tableModel, JTable table, ResultSet resData) {
+    private boolean fillDataRows(DefaultTableModel tableModel, JTable table, HashMap<Connection,ResultSet> rawData) {
+        Connection connection = (Connection) rawData.keySet().toArray()[0];
+        ResultSet resData = rawData.get(connection);
         if (resData != null) {
             try {
                 fillColumnHeaders(tableModel);
@@ -104,6 +108,8 @@ public class DatabaseRequests extends DatabaseUtility {
                 
             } catch (SQLException ex) {
                 Logger.getLogger(DatabaseRequests.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                Close(connection);
             }
         }
         return false;
@@ -114,7 +120,7 @@ public class DatabaseRequests extends DatabaseUtility {
      * @param table 
      */
     public void initializeTable(JTable table) {
-        ResultSet resData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
+        HashMap<Connection,ResultSet> resData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
         fillDataRows(new DefaultTableModel(), table, resData);
     }
     
@@ -124,7 +130,9 @@ public class DatabaseRequests extends DatabaseUtility {
      */
     private String[] getColumnNames() {
         String[] columns = new String[7];
-        ResultSet columnNames = RetrieveQuery("SELECT name FROM PRAGMA_TABLE_INFO('students_tbl');");
+        HashMap<Connection, ResultSet> rawData = RetrieveQuery("SELECT name FROM PRAGMA_TABLE_INFO('students_tbl');");
+        Connection key = (Connection) rawData.keySet().toArray()[0];
+        ResultSet columnNames = rawData.get(key);
         try {
            if (columnNames != null) {
                int index = 0;
@@ -137,6 +145,8 @@ public class DatabaseRequests extends DatabaseUtility {
            }
         }catch(SQLException e) {
             return null;
+        } finally {
+            Close(key);
         }
     }
     
@@ -147,7 +157,7 @@ public class DatabaseRequests extends DatabaseUtility {
      * @return Boolean
      */
     public boolean searchData(JTable table, String searchQuery) {
-        ResultSet rawData;
+        HashMap<Connection,ResultSet> rawData;
         if (!searchQuery.isBlank() || searchQuery.isEmpty())
             rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl WHERE " +
                 String.format("first_name LIKE '%s%%' OR last_name LIKE '%s%%' OR age LIKE '%s%%' OR phone LIKE '%s%%' OR course LIKE '%s%%' OR student_no LIKE '%s%%';", searchQuery,
@@ -165,7 +175,7 @@ public class DatabaseRequests extends DatabaseUtility {
      */
     public boolean insertData(String[] data, JTable table) {
         if (ExecuteQuery(String.format("INSERT INTO students_tbl (first_name, last_name, age, phone,course, student_no) VALUES ('%s', '%s', %d , '%s', '%s', '%s');", data[0], data[1], Integer.parseInt(data[2]), data[3], data[4], data[5]))) {
-            ResultSet rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
+            HashMap<Connection,ResultSet> rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
             fillDataRows(new DefaultTableModel(), table, rawData);
             return true;
         }
@@ -183,7 +193,8 @@ public class DatabaseRequests extends DatabaseUtility {
         if(ExecuteQuery(String.format("UPDATE students_tbl SET first_name = '%s',"
                 + "last_name = '%s', age = %s, phone = '%s', course = '%s', student_no = '%s'"+
                 " WHERE id = %s;", data[0],data[1],data[2],data[3],data[4],data[5], id))){
-            ResultSet rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
+            HashMap<Connection, ResultSet> rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
+            
             return fillDataRows(new DefaultTableModel(), table, rawData);
 
         }
@@ -198,7 +209,7 @@ public class DatabaseRequests extends DatabaseUtility {
      */
     public boolean deleteData(JTable table, String id) {
         if(ExecuteQuery(String.format("DELETE FROM students_tbl WHERE id = %s", id))) {
-            ResultSet rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
+            HashMap<Connection,ResultSet> rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
             fillDataRows(new DefaultTableModel(), table, rawData);
             return true;
         }

@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -105,13 +106,15 @@ public class DatabaseUtility {
      * @param query
      * @return ResultSet
      */
-    public ResultSet RetrieveQuery(String query) {
+    public HashMap<Connection, ResultSet> RetrieveQuery(String query) {
+        HashMap<Connection, ResultSet> resData = new HashMap<>();
         Connection connection = CreateDatabaseConnection();
         if(connection != null) {
             try {
                 Statement statement = connection.createStatement();
                 statement.setQueryTimeout(30);
-                return statement.executeQuery(query);
+                resData.put(connection, statement.executeQuery(query));
+                return resData;
             } catch (SQLException e) {
                 Logger.getLogger(DatabaseRequests.class.getName()).log(Level.SEVERE, null, e);
             }

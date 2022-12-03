@@ -214,7 +214,10 @@ public class ModalWindow extends javax.swing.JDialog {
 
     // Click event
     private void updateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateBtnActionPerformed
-        String id = MainWindow.studentsDataView.getValueAt(MainWindow.studentsDataView.getSelectedRow(), 0).toString();
+        String id = null;
+        if(MainWindow.studentsDataView.getRowCount() > 0) {
+            id = MainWindow.studentsDataView.getValueAt(MainWindow.studentsDataView.getSelectedRow(), 0).toString();
+        }
         String[] data = {firstNameTextField.getText(), lastNameTextField.getText(),
                         ageTextField.getText(), phoneTextField.getText(), courseTextField.getText(),
                         studentNoTextField.getText()};
@@ -223,6 +226,7 @@ public class ModalWindow extends javax.swing.JDialog {
         };
         if(databaseHandler.updateData(data, MainWindow.studentsDataView, id)) {
             this.setVisible(false);
+            MainWindow.studentsDataView.setRowSelectionInterval(0, 0);
         }
         for (JTextField textField : textFields)
             textField.setText("");
