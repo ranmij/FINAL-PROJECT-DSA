@@ -4,16 +4,13 @@
  */
 package StudentsRecordSystem;
 
-import java.awt.Color;
-import java.util.Arrays;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-import javax.swing.border.LineBorder;
+import java.util.Arrays;
+import javax.swing.JOptionPane;
 
 /**
  *
- * @author Clancy Sanchez
+ * @author Jomari Tenorio
  */
 public class ModalWindow extends javax.swing.JDialog {
 
@@ -189,25 +186,17 @@ public class ModalWindow extends javax.swing.JDialog {
   
     // Click event
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
-        String[] data = {firstNameTextField.getText(), lastNameTextField.getText(), 
-                ageTextField.getText(), phoneTextField.getText(), courseTextField.getText(),
-                studentNoTextField.getText()};
         JTextField[] textFields = {
             firstNameTextField, lastNameTextField, ageTextField, phoneTextField, courseTextField, studentNoTextField
         };
-        if (!Arrays.asList(data).stream().allMatch(str-> !(str.isBlank() || str.isEmpty()))) {
+        String[] data = {firstNameTextField.getText(), lastNameTextField.getText(), 
+                ageTextField.getText(), phoneTextField.getText(), courseTextField.getText(),
+                studentNoTextField.getText()};
+        
+        if (Arrays.asList(data).stream().allMatch((x) -> !x.isBlank() && !x.isEmpty()) && databaseHandler.insertData(data, MainWindow.studentsDataView)) {
+            this.setVisible(false);
             for(JTextField textField : textFields) {
-                if (textField.getText().isBlank() || textField.getText().isEmpty()) {
-                    textField.setBorder(new LineBorder(Color.red, 1));
-                }
-            }
-        } else {
-            if (databaseHandler.insertData(data, MainWindow.studentsDataView)) {
-                this.setVisible(false);
-                for(JTextField textField : textFields) {
-                   textField.setText("");
-                   textField.setBorder(new LineBorder(Color.gray, 1));
-                }
+               textField.setText("");
             }
         }
     }//GEN-LAST:event_addBtnActionPerformed
@@ -217,36 +206,42 @@ public class ModalWindow extends javax.swing.JDialog {
         String id = null;
         if(MainWindow.studentsDataView.getRowCount() > 0) {
             id = MainWindow.studentsDataView.getValueAt(MainWindow.studentsDataView.getSelectedRow(), 0).toString();
-        }
-        String[] data = {firstNameTextField.getText(), lastNameTextField.getText(),
+            String[] data = {firstNameTextField.getText(), lastNameTextField.getText(),
                         ageTextField.getText(), phoneTextField.getText(), courseTextField.getText(),
                         studentNoTextField.getText()};
-        JTextField[] textFields = {
-            firstNameTextField, lastNameTextField, ageTextField, phoneTextField, courseTextField, studentNoTextField
-        };
-        if(databaseHandler.updateData(data, MainWindow.studentsDataView, id)) {
-            this.setVisible(false);
-            MainWindow.studentsDataView.setRowSelectionInterval(0, 0);
+            JTextField[] textFields = {
+                firstNameTextField, lastNameTextField, ageTextField, phoneTextField, courseTextField, studentNoTextField
+            };
+            if(Arrays.asList(textFields).stream().allMatch((x) -> !x.getText().isBlank() && !x.getText().isEmpty())) {
+                if(databaseHandler.updateData(data, MainWindow.studentsDataView, id)) {
+                    JOptionPane.showMessageDialog(this, "Updated Successfully.");
+                    this.setVisible(false);
+                    MainWindow.studentsDataView.setRowSelectionInterval(0, 0);
+                }
+            }
+            for (JTextField textField : textFields)
+                textField.setText("");
         }
-        for (JTextField textField : textFields)
-            textField.setText("");
+        
     }//GEN-LAST:event_updateBtnActionPerformed
 
     // Click event
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
         String id = null;
-        if(MainWindow.studentsDataView.getRowCount() > 0) {
+        if(MainWindow.studentsDataView.getSelectedRow() > -1) {
             id = MainWindow.studentsDataView.getValueAt(MainWindow.studentsDataView.getSelectedRow(), 0).toString();
+            if(databaseHandler.deleteData(MainWindow.studentsDataView, id)) {
+                JOptionPane.showMessageDialog(this, "Deleted successfully.");
+                this.setVisible(false);
+                MainWindow.studentsDataView.clearSelection();
+            }
+            JTextField[] textFields = {
+                firstNameTextField, lastNameTextField, ageTextField, phoneTextField, courseTextField, studentNoTextField
+            };
+            for (JTextField textField : textFields)
+                textField.setText("");
         }
-        if(databaseHandler.deleteData(MainWindow.studentsDataView, id)) {
-            this.setVisible(false);
-            MainWindow.studentsDataView.setRowSelectionInterval(0, 0);
-        }
-        JTextField[] textFields = {
-            firstNameTextField, lastNameTextField, ageTextField, phoneTextField, courseTextField, studentNoTextField
-        };
-        for (JTextField textField : textFields)
-            textField.setText("");
+        
 
     }//GEN-LAST:event_deleteBtnActionPerformed
 

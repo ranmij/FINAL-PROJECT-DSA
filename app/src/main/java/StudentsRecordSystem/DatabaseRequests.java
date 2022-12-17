@@ -13,13 +13,16 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 
 /**
  *
- * @author Clancy Sanchez
+ * @author Jomari Tenorio
  */
 public class DatabaseRequests extends DatabaseUtility {
 
@@ -34,7 +37,7 @@ public class DatabaseRequests extends DatabaseUtility {
             try {
                 Files.createDirectories(Paths.get(System.getProperty("user.home") + "\\SchoolRecordSystem"));
                 this.setDatabaseName(System.getProperty("user.home") + "\\SchoolRecordSystem\\" + databaseName);
-                if (!initTables()) {
+                if (!initializeDatabaseTable()) {
                     System.exit(1);
                 }
             } catch (IOException ex) {
@@ -49,7 +52,7 @@ public class DatabaseRequests extends DatabaseUtility {
      * Initialize the database when the application first run
      * @return Boolean 
      */
-    private boolean initTables(){
+    private boolean initializeDatabaseTable(){
         String sqlQuery = "CREATE TABLE students_tbl (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
                 + "first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL,"
                 + "age INT NOT NULL, phone VARCHAR(20) NOT NULL, course VARHCAR(10) NOT NULL,"
@@ -64,7 +67,7 @@ public class DatabaseRequests extends DatabaseUtility {
      * Set the column header of the table
      * @param tableModel 
      */
-    private void fillColumnHeaders(DefaultTableModel tableModel) {
+    private void fillColumnDataHeaders(DefaultTableModel tableModel) {
         String[] columnNames = getColumnNames();
         if (columnNames != null) {
             for(String columName : columnNames) {
@@ -80,13 +83,15 @@ public class DatabaseRequests extends DatabaseUtility {
      * @param resData
      * @return Boolean
      */
-    private boolean fillDataRows(DefaultTableModel tableModel, JTable table, HashMap<Connection,ResultSet> rawData) {
+    private boolean fillDataTableRows(DefaultTableModel tableModel, JTable table, HashMap<Connection,ResultSet> rawData) {
         Connection connection = (Connection) rawData.keySet().toArray()[0];
         ResultSet resData = rawData.get(connection);
         if (resData != null) {
             try {
-                fillColumnHeaders(tableModel);
+                fillColumnDataHeaders(tableModel);
                 String[] columns = {"id", "first_name", "last_name", "age", "phone", "course", "student_no"};
+                DefaultTableCellRenderer render = new DefaultTableCellRenderer();
+                render.setHorizontalAlignment(JLabel.CENTER);
                 if (resData.next()) {
                     do {
                         Object[] data = new Object[7];
@@ -100,6 +105,12 @@ public class DatabaseRequests extends DatabaseUtility {
                     tableColumn.setPreferredWidth(0);
                     tableColumn.setMinWidth(0);
                     tableColumn.setMaxWidth(0);
+                    TableModel tableM = table.getModel();
+
+                    for (int columnIndex = 0; columnIndex < tableM.getColumnCount(); columnIndex++)
+                    {
+                        table.getColumnModel().getColumn(columnIndex).setCellRenderer(render);
+                    }
                     return true;
                 } else {
                     table.setModel(tableModel);
@@ -121,7 +132,7 @@ public class DatabaseRequests extends DatabaseUtility {
      */
     public void initializeTable(JTable table) {
         HashMap<Connection,ResultSet> resData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
-        fillDataRows(new DefaultTableModel(), table, resData);
+        fillDataTableRows(new DefaultTableModel(), table, resData);
     }
     
     /**
@@ -164,7 +175,7 @@ public class DatabaseRequests extends DatabaseUtility {
                             searchQuery, searchQuery, searchQuery, searchQuery, searchQuery));
         else 
             rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
-        return fillDataRows(new DefaultTableModel(), table, rawData);
+        return fillDataTableRows(new DefaultTableModel(), table, rawData);
     }
     
     /**
@@ -174,9 +185,9 @@ public class DatabaseRequests extends DatabaseUtility {
      * @return Boolean
      */
     public boolean insertData(String[] data, JTable table) {
-        if (ExecuteQuery(String.format("INSERT INTO students_tbl (first_name, last_name, age, phone,course, student_no) VALUES ('%s', '%s', %d , '%s', '%s', '%s');", data[0], data[1], Integer.parseInt(data[2]), data[3], data[4], data[5]))) {
+        if (ExecuteQuery(String.format("INSERT INTO students_tbl (first_name, last_name, age, phone,course, student_no) VALUES ('%s', '%s', %s , '%s', '%s', '%s');", data[0], data[1], data[2], data[3], data[4], data[5]))) {
             HashMap<Connection,ResultSet> rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
-            fillDataRows(new DefaultTableModel(), table, rawData);
+            fillDataTableRows(new DefaultTableModel(), table, rawData);
             return true;
         }
         return false;
@@ -191,11 +202,11 @@ public class DatabaseRequests extends DatabaseUtility {
      */
     public boolean updateData(String[] data, JTable table, String id) {
         if(ExecuteQuery(String.format("UPDATE students_tbl SET first_name = '%s',"
-                + "last_name = '%s', age = %s, phone = '%s', course = '%s', student_no = '%s'"+
+                + " last_name = '%s', age = %s, phone = '%s', course = '%s', student_no = '%s'"+
                 " WHERE id = %s;", data[0],data[1],data[2],data[3],data[4],data[5], id))){
             HashMap<Connection, ResultSet> rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
+            return fillDataTableRows(new DefaultTableModel(), table, rawData);
             
-            return fillDataRows(new DefaultTableModel(), table, rawData);
 
         }
         return false;
@@ -210,7 +221,7 @@ public class DatabaseRequests extends DatabaseUtility {
     public boolean deleteData(JTable table, String id) {
         if(ExecuteQuery(String.format("DELETE FROM students_tbl WHERE id = %s", id))) {
             HashMap<Connection,ResultSet> rawData = RetrieveQuery("SELECT id, first_name, last_name, age, phone, course, student_no FROM students_tbl;");
-            fillDataRows(new DefaultTableModel(), table, rawData);
+            fillDataTableRows(new DefaultTableModel(), table, rawData);
             return true;
         }
         return false;

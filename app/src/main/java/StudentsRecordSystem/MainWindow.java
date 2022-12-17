@@ -9,7 +9,7 @@ import javax.swing.JTextField;
 
 /**
  *
- * @author Clancy Sanchez
+ * @author Jomari Tenorio
  */
 public class MainWindow extends javax.swing.JFrame {
 
@@ -19,8 +19,8 @@ public class MainWindow extends javax.swing.JFrame {
      */
     public MainWindow() {
         databaseHandler = new DatabaseRequests("database.db");
-        databaseHandler.initializeTable(studentsDataView);
         initComponents();
+        databaseHandler.initializeTable(studentsDataView);
     }
 
     
@@ -43,6 +43,14 @@ public class MainWindow extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
+        studentsDataView.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
         studentsDataView.getTableHeader().setReorderingAllowed(false);
         studentsDataView.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -116,11 +124,16 @@ public class MainWindow extends javax.swing.JFrame {
         if(!databaseHandler.searchData(studentsDataView,searchString)){
             JOptionPane.showMessageDialog(this, "No result");
         }
-        
     }//GEN-LAST:event_searchBtnActionPerformed
 
     private void addStudentBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addStudentBtnActionPerformed
-        // TODO add your handling code here:
+        JTextField[] textFields = {
+            ModalWindow.firstNameTextField, ModalWindow.lastNameTextField, ModalWindow.ageTextField, ModalWindow.phoneTextField, 
+            ModalWindow.courseTextField, ModalWindow.studentNoTextField
+        };
+        for(JTextField textField : textFields) {
+           textField.setText("");
+        }
         ModalWindow modalDialog = new ModalWindow(this, true);
         ModalWindow.updateBtn.setVisible(false);
         ModalWindow.deleteBtn.setVisible(false);

@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Clancy Sanchez
+ * @author Jomari Tenorio
  */
 public class DatabaseUtility {
     private String databaseName;        // databaseName
@@ -37,7 +37,7 @@ public class DatabaseUtility {
     }
     
     /**
-     * databasename setter
+     * database name setter
      * @param databaseName 
      */
     public void setDatabaseName(String databaseName) {
@@ -96,6 +96,8 @@ public class DatabaseUtility {
                 return true;
             } catch (SQLException e) {
                 Logger.getLogger(DatabaseRequests.class.getName()).log(Level.SEVERE, null, e);
+            } finally {
+                Close(connection);
             }
         }
         return false;
