@@ -7,6 +7,12 @@ Navigate to the root folder then run this command
 java -jar app.jar
 ```
 
+## Compiling using gradle
+Navigate to the root folder then run this command
+```bash
+gradle build
+```
+
 # External Libraries
 + [Flatlaf for Material UI](https://www.formdev.com/flatlaf/)
 + [SQLite JDBC](https://github.com/xerial/sqlite-jdbc)
